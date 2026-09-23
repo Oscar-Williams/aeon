@@ -187,7 +187,7 @@ expect_fail "$d" "trust_level\` must be one of" "an unknown \`trust_level\` is r
 # ── README parity ───────────────────────────────────────────────────────────
 d=$(new_fixture noreadmerow)
 write_readme "$d" 1 '| [Other](https://github.com/other/pack) | 1 | Other. |'
-expect_fail "$d" "no row in the README" "a registry entry with no README row is rejected"
+expect_fail "$d" "no row in the Community Packs table" "a registry entry with no README row is rejected"
 
 d=$(new_fixture noregentry)
 write_readme "$d" 1 "$ONE_ROW
@@ -196,7 +196,7 @@ expect_fail "$d" "no entry in catalog/skill-packs.json" "a README row with no re
 
 d=$(new_fixture countmismatch)
 write_readme "$d" 1 '| [Good Pack](https://github.com/goodowner/good-pack) | 7 | A pack. |'
-expect_fail "$d" "README says 7 skill(s) but the registry lists 2" "a skill-count mismatch is rejected"
+expect_fail "$d" "table says 7 skill(s) but the registry lists 2" "a skill-count mismatch is rejected"
 
 d=$(new_fixture missingpathflag)
 write_registry "$d" '[{"repo":"goodowner/good-pack","name":"Good Pack","description":"A pack.","author":"goodowner","path":"aeon-skills","skills":["alpha","beta"]}]'
@@ -232,7 +232,7 @@ expect_fail "$d" "no entry for this repo at path" "a second row from the same re
 d=$(new_fixture duperow)
 write_readme "$d" 1 "$ONE_ROW
 $ONE_ROW"
-expect_fail "$d" "listed twice in the README" "the same pack listed twice in the README is rejected"
+expect_fail "$d" "listed twice in the Community Packs table" "the same pack listed twice in the README is rejected"
 
 d=$(new_fixture counter)
 write_readme "$d" 9 "$ONE_ROW"
@@ -260,6 +260,30 @@ $ONE_ROW
 EOF
 expect_ok "$d" "the first-party two-column packs table is not mistaken for the registry table"
 
+# The real table lives under "## Listed packs" in docs/community-skill-packs.md
+# (#845); the parser must anchor there too.
+d=$(new_fixture listedpacks)
+cat > "$d/README.md" <<EOF
+# Community Skill Packs
+
+## Listed packs
+
+| Pack | Skills | Description |
+|------|--------|-------------|
+$ONE_ROW
+EOF
+expect_ok "$d" "a table under a \"Listed packs\" heading is parsed"
+
+# A missing table used to warn "parity unchecked" and exit 0, which is how the
+# check went silent in CI after #845 moved it. Both cases must now fail.
+d=$(new_fixture notable)
+printf '# Community Skill Packs\n\nNo table here.\n' > "$d/README.md"
+expect_fail "$d" "registry parity cannot be checked" "a table file with no packs table is rejected"
+
+d=$(new_fixture notablefile)
+rm "$d/README.md"
+expect_fail "$d" "table file not found" "a missing table file is rejected"
+
 # ── Warnings do not fail the gate ───────────────────────────────────────────
 d=$(new_fixture unknownfield)
 write_registry "$d" '[{"repo":"goodowner/good-pack","name":"Good Pack","description":"A pack.","author":"goodowner","skills":["alpha","beta"],"secrets_optional":["TUNING_KEY"]}]'
@@ -281,8 +305,8 @@ fi
 
 # ── The committed registry itself ───────────────────────────────────────────
 out="$(node "$V" 2>&1)"; rc=$?
-if [[ $rc -eq 0 ]]; then pass "the committed catalog/skill-packs.json conforms and matches the README"
-else bad "the committed catalog/skill-packs.json conforms and matches the README"; echo "$out" | sed 's/^/       /'; fi
+if [[ $rc -eq 0 ]]; then pass "the committed catalog/skill-packs.json conforms and matches docs/community-skill-packs.md"
+else bad "the committed catalog/skill-packs.json conforms and matches docs/community-skill-packs.md"; echo "$out" | sed 's/^/       /'; fi
 
 echo ""
 if [[ $fail -eq 0 ]]; then echo "test_validate_skill_packs: ALL PASS"; else echo "test_validate_skill_packs: FAILURES"; fi
