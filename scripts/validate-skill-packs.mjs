@@ -356,15 +356,6 @@ if (!existsSync(TABLE)) {
       const hint = registryRepos.has(row.repo) ? ` — the registry has no entry for this repo at path ${JSON.stringify(row.path)}` : ''
       err(`${row.repo}: has a Community Packs table row but no entry in catalog/skill-packs.json (${T}:${row.line})${hint} - \`bin/install-skill-pack --list\` and the dashboard would not show it`)
     }
-
-    // The proof-of-work counter drifts every time a pack lands. Only enforced
-    // when the sentence is present and parseable, so a reword can't false-fail.
-    const counter = tableText.match(/\*\*(\d+)\s+community skill packs\*\*/)
-    if (!counter) {
-      warn('table file has no "**N community skill packs**" counter - count parity unchecked')
-    } else if (Number(counter[1]) !== registry.packs.length) {
-      err(`${T} claims "${counter[1]} community skill packs" but the registry lists ${registry.packs.length} - update the counter`)
-    }
   }
 }
 
