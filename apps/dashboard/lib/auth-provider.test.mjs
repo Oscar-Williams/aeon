@@ -106,6 +106,15 @@ test('routes UsePod tokens via explicit provider selection', () => {
   assert.equal(config.baseUrl, '')
 })
 
+test('routes OrcaRouter keys via explicit provider selection', () => {
+  const config = normalizeAuthConfig({ key: 'orcarouter-key-no-prefix', provider: 'orcarouter' })
+
+  assert.equal(config.secretName, 'ORCAROUTER_API_KEY')
+  assert.equal(config.method, 'orcarouter')
+  assert.equal(config.gateway, 'orcarouter')
+  assert.equal(config.baseUrl, '')
+})
+
 test('routes xAI keys to XAI_API_KEY via the grok gateway by prefix', () => {
   const config = normalizeAuthConfig({ key: 'xai-abc123' })
 
@@ -130,6 +139,10 @@ test('rejects gateway keys with a custom base URL', () => {
   assert.throws(
     () => normalizeAuthConfig({ key: 'any-key', provider: 'venice', baseUrl: 'https://api.venice.ai' }),
     /Venice gateway keys cannot be used with a custom base URL/,
+  )
+  assert.throws(
+    () => normalizeAuthConfig({ key: 'any-key', provider: 'orcarouter', baseUrl: 'https://api.orcarouter.ai/v1' }),
+    /OrcaRouter gateway keys cannot be used with a custom base URL/,
   )
 })
 

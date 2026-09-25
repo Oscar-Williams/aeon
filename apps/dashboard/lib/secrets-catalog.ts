@@ -31,6 +31,7 @@ export const BUILTIN_SECRETS: Omit<Secret, 'isSet'>[] = [
   { name: 'USEPOD_TOKEN', group: 'Core', description: "UsePod proxy token - routes Claude through UsePod's gateway (token embedded in the base URL). Get one at usepod.ai" },
   { name: 'VENICE_API_KEY', group: 'Core', description: 'Venice API key - routes Claude through api.venice.ai via a local translator. Create at venice.ai/settings/api' },
   { name: 'SURPLUS_API_KEY', group: 'Core', description: 'Surplus Intelligence API key (inf_...) - routes Claude through surplusintelligence.ai via a local translator' },
+  { name: 'ORCAROUTER_API_KEY', group: 'Core', description: 'OrcaRouter API key - routes Claude through api.orcarouter.ai via a local translator. Pick OrcaRouter in Authenticate or set the secret directly.' },
   { name: 'TELEGRAM_BOT_TOKEN', group: 'Telegram', description: 'Bot token from @BotFather' },
   { name: 'TELEGRAM_CHAT_ID', group: 'Telegram', description: 'Your chat ID' },
   { name: 'TELEGRAM_ALLOWED_USER_ID', group: 'Telegram', description: 'Optional - your numeric Telegram user ID (from @userinfobot). Only needed when TELEGRAM_CHAT_ID is a group/public chat: it restricts who can command the bot to this one user, so a random group member cannot dispatch skills or schedule crons by tapping a button. Defaults to TELEGRAM_CHAT_ID, which is correct for a 1:1 DM. In a group, button taps and messages fail closed until this is set.' },

@@ -523,6 +523,7 @@ jobs:
           VENICE_API_KEY: ${{ secrets.VENICE_API_KEY }}
           HIVEMINDOS_CREDIT_TOKEN: ${{ secrets.HIVEMINDOS_CREDIT_TOKEN }}
           SURPLUS_API_KEY: ${{ secrets.SURPLUS_API_KEY }}
+          ORCAROUTER_API_KEY: ${{ secrets.ORCAROUTER_API_KEY }}
           OPENROUTER_MODEL: ${{ vars.OPENROUTER_MODEL }}
           OPENROUTER_MODEL_SONNET: ${{ vars.OPENROUTER_MODEL_SONNET }}
           OPENROUTER_MODEL_HAIKU: ${{ vars.OPENROUTER_MODEL_HAIKU }}
@@ -538,6 +539,7 @@ jobs:
           VENICE_CLEANCACHE: ${{ vars.VENICE_CLEANCACHE }}
           SURPLUS_MODEL: ${{ vars.SURPLUS_MODEL }}
           GLM_MODEL: ${{ vars.GLM_MODEL }}
+          ORCAROUTER_MODEL: ${{ vars.ORCAROUTER_MODEL }}
           GLM_REASONING_EFFORT: ${{ vars.GLM_REASONING_EFFORT }}
           CCR_LOG: ${{ vars.CCR_LOG }}
           # Optional Langfuse observability — traces the conversational-reply run

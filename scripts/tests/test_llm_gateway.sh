@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Tests for the glm and hivemindos arms of scripts/llm-gateway.sh.
+# Tests for the glm, hivemindos, and orcarouter arms of scripts/llm-gateway.sh.
 # The shim is SOURCED by the workflow, so these tests source it too. Each case
 # runs in a subshell so exported CLAUDE_CODE_* / ANTHROPIC_* vars don't leak.
 # Run: bash scripts/tests/test_llm_gateway.sh
@@ -121,6 +121,53 @@ hm_src() {
   [ "$(bash "$GW")" = "hivemindos" ]
 ) && pass "gateway=auto resolves to hivemindos on the credit token alone" \
   || bad "gateway=auto resolves to hivemindos on the credit token alone"
+
+# --- orcarouter arm --------------------------------------------------------
+orca_src() {
+  export AEON_GATEWAY_DRY_RUN=1 GATEWAY=orcarouter ORCAROUTER_API_KEY=test-key
+  # shellcheck disable=SC1090
+  source "$GW" 2>/dev/null | grep '^ccr-sidecar '
+}
+
+# 12. The optional arm still refuses a pinned run without its key.
+( export AEON_GATEWAY_DRY_RUN=1 GATEWAY=orcarouter MODEL=claude-sonnet-5
+  unset ORCAROUTER_API_KEY
+  # shellcheck disable=SC1090
+  source "$GW" >/dev/null 2>&1
+) && bad "no ORCAROUTER_API_KEY → refuse" \
+  || pass "no ORCAROUTER_API_KEY → refuse"
+
+# 13. Default endpoint and auto-routing model are deterministic and offline.
+( unset ORCAROUTER_MODEL
+  line="$(orca_src)"
+  case "$line" in *"url=https://api.orcarouter.ai/v1/chat/completions"*) ;; *) exit 1 ;; esac
+  case "$line" in *"model=orcarouter/auto"*) ;; *) exit 1 ;; esac
+) && pass "defaults → OrcaRouter endpoint and orcarouter/auto" \
+  || bad "defaults → OrcaRouter endpoint and orcarouter/auto"
+
+# 14. Operators can pin a catalog model without changing the sidecar endpoint.
+( export ORCAROUTER_MODEL=anthropic/claude-sonnet-5
+  case "$(orca_src)" in *"model=anthropic/claude-sonnet-5"*) ;; *) exit 1 ;; esac
+) && pass "ORCAROUTER_MODEL override" \
+  || bad "ORCAROUTER_MODEL override"
+
+# 15. No other credential is needed for auto resolution; the provider remains
+# opt-in because the unset-key path never adds it to the candidate list.
+( export AEON_GATEWAY_DRY_RUN=1 GATEWAY=auto AEON_LIST_CANDIDATES=1 ORCAROUTER_API_KEY=test-key
+  unset CLAUDE_CODE_OAUTH_TOKEN ANTHROPIC_API_KEY OPENROUTER_API_KEY BANKR_LLM_KEY USEPOD_TOKEN VENICE_API_KEY SURPLUS_API_KEY XAI_API_KEY GLM_API_KEY ZAI_API_KEY HIVEMINDOS_CREDIT_TOKEN
+  [ "$(bash "$GW")" = "orcarouter" ]
+) && pass "gateway=auto resolves to orcarouter on its key alone" \
+  || bad "gateway=auto resolves to orcarouter on its key alone"
+
+# 16. The real sourced path emits the workflow notices required by the gateway
+# contribution contract, while still using the offline sidecar dry-run.
+( export AEON_GATEWAY_DRY_RUN=1 GATEWAY=auto ORCAROUTER_API_KEY=test-key
+  unset CLAUDE_CODE_OAUTH_TOKEN ANTHROPIC_API_KEY OPENROUTER_API_KEY BANKR_LLM_KEY USEPOD_TOKEN VENICE_API_KEY SURPLUS_API_KEY XAI_API_KEY GLM_API_KEY ZAI_API_KEY HIVEMINDOS_CREDIT_TOKEN
+  line="$(bash "$GW" 2>&1)"
+  case "$line" in *"gateway=auto resolved to 'orcarouter'"*) ;; *) exit 1 ;; esac
+  case "$line" in *"Routing through OrcaRouter via claude-code-router"*) ;; *) exit 1 ;; esac
+) && pass "gateway=auto run logs resolution and OrcaRouter routing notices" \
+  || bad "gateway=auto run logs resolution and OrcaRouter routing notices"
 
 echo
 if [ "$fail" -eq 0 ]; then echo "All llm-gateway tests passed."; else echo "Some tests FAILED."; fi

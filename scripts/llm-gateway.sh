@@ -6,7 +6,7 @@
 # call in the same shell. Place at: scripts/llm-gateway.sh
 #
 # Inputs already present in the step environment:
-#   $GATEWAY                    auto | direct | bankr | openrouter | usepod | surplus | venice | grok | glm | hivemindos
+#   $GATEWAY                    auto | direct | bankr | openrouter | usepod | surplus | venice | grok | glm | hivemindos | orcarouter
 #                               (auto = resolve at run time from which secrets are set)
 #   $MODEL                      aeon's resolved model id (may be rewritten here)
 #   <PROVIDER> secret           the secret for the selected gateway (see below)
@@ -18,7 +18,7 @@
 #
 # Two routing tiers:
 #   NATIVE (no proxy): bankr, openrouter, usepod, grok, glm  -> set base URL + auth, done.
-#   SIDECAR (wrapper): surplus, venice, hivemindos -> start claude-code-router on
+#   SIDECAR (wrapper): surplus, venice, hivemindos, orcarouter -> start claude-code-router on
 #                                                    127.0.0.1 to translate
 #                                                    Anthropic <-> OpenAI.
 #
@@ -143,6 +143,7 @@ JSON
 #   anthropic  pay-as-you-go Anthropic API (ANTHROPIC_API_KEY)
 #   openrouter bankr usepod venice surplus  — gateway keys
 #   hivemindos HivemindOS Models             (HIVEMINDOS_CREDIT_TOKEN)
+#   orcarouter OrcaRouter                   (ORCAROUTER_API_KEY)
 #
 # `claude` and `anthropic` are NATIVE direct-API tiers (handled by the case
 # below). `direct` is the implicit final fallback (errors later if no usable key).
@@ -158,13 +159,14 @@ aeon_present() {  # is the secret for provider $1 set?
     grok)       [ -n "${XAI_API_KEY:-}" ] ;;
     glm)        [ -n "${GLM_API_KEY:-${ZAI_API_KEY:-}}" ] ;;
     hivemindos) [ -n "${HIVEMINDOS_CREDIT_TOKEN:-}" ] ;;
+    orcarouter) [ -n "${ORCAROUTER_API_KEY:-}" ] ;;
     *) false ;;
   esac
 }
 if [ -z "${GATEWAY:-}" ] || [ "${GATEWAY}" = "auto" ]; then
   # Ordered list of every provider whose secret is set (priority via GATEWAY_ORDER).
   AEON_CANDIDATES=""
-  for provider in ${GATEWAY_ORDER:-claude anthropic openrouter bankr usepod venice surplus grok glm hivemindos}; do
+  for provider in ${GATEWAY_ORDER:-claude anthropic openrouter bankr usepod venice surplus grok glm hivemindos orcarouter}; do
     if aeon_present "$provider"; then AEON_CANDIDATES="${AEON_CANDIDATES:+$AEON_CANDIDATES }$provider"; fi
   done
   [ -z "$AEON_CANDIDATES" ] && AEON_CANDIDATES="direct"
@@ -360,6 +362,17 @@ X-Title: ${OPENROUTER_APP_TITLE:-Aeon}"
       "${HIVEMINDOS_BASE_URL:-https://hivemindos-paid-agent-gateway.hivemindos.workers.dev/api/paid-agents/default}/chat/completions" \
       "$HIVEMINDOS_CREDIT_TOKEN" "$hivemindos_model" "hivemindos"
     echo "::notice::Routing through HivemindOS Models via claude-code-router (${hivemindos_model})"
+    ;;
+
+  orcarouter)  # SIDECAR — OrcaRouter's OpenAI-compatible adaptive gateway
+    require_secret ORCAROUTER_API_KEY
+    # OrcaRouter's `orcarouter/auto` model keeps provider selection inside the
+    # gateway. Set ORCAROUTER_MODEL to pin a catalog id for a deployment.
+    orcarouter_model="${ORCAROUTER_MODEL:-orcarouter/auto}"
+    start_ccr_sidecar orcarouter \
+      "https://api.orcarouter.ai/v1/chat/completions" \
+      "$ORCAROUTER_API_KEY" "$orcarouter_model"
+    echo "::notice::Routing through OrcaRouter via claude-code-router (${orcarouter_model})"
     ;;
 
   direct|"")  # NATIVE — Anthropic API or an Anthropic-compatible endpoint

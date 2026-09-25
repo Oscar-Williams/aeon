@@ -44,6 +44,7 @@ The first two are the direct-to-Anthropic options; the rest are gateways. Settin
 | `VENICE_API_KEY` | venice.ai/settings/api — routed through a local translator sidecar |
 | `SURPLUS_API_KEY` | surplusintelligence.ai — `inf_…`, settles USDC on Base. Fund the wallet and `approve()` once before first use |
 | `HIVEMINDOS_CREDIT_TOKEN` | HivemindOS Models - a credit token billed to a balance, not a provider account. Routed through a local translator sidecar. Not in the dashboard modal yet; set it with `gh secret set` |
+| `ORCAROUTER_API_KEY` | orcarouter.ai - OpenAI-compatible adaptive routing through a local translator sidecar; select OrcaRouter in the dashboard or pass `--provider orcarouter` |
 | `XAI_API_KEY` | console.x.ai — `xai-…`. Triple duty: X/tweet skills, the Grok gateway, and API-key auth for the grok harness |
 | `GROK_CREDENTIALS` | Dashboard → AUTH → **Connect X account**. Base64 of your `~/.grok` session; runs the grok harness on a SuperGrok / X Premium+ entitlement. No CLI path for this one |
 
@@ -117,6 +118,7 @@ Set with `gh variable set NAME "value"`.
 | `GROK_MODEL` | Model for the Grok gateway path |
 | `GLM_MODEL` | Model for the GLM (Z.AI) gateway path (default `glm-5.2`) |
 | `GLM_REASONING_EFFORT` | GLM gateway reasoning depth: `low` / `high` / `max` (default `high`) |
+| `ORCAROUTER_MODEL` | Model for the OrcaRouter gateway path (default `orcarouter/auto`) |
 | `STATE_BACKEND` | `file` (default) · `dual` · `issues` — where run state lives |
 | `HEALTH_ISSUES` | `0` disables the votable per-skill health Issues |
 | `NOTIFY_MIN_SEVERITY` | Suppress notifications below this level |

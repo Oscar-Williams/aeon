@@ -398,7 +398,7 @@ jobs:
           SECRETS=$(grep -oE '\$\{?[A-Z][A-Z0-9_]{2,}\}?' "$SKILL_FILE" 2>/dev/null | \
             sed 's/[${}]//g' | \
             grep -E '_(API_KEY|KEY|TOKEN|SECRET|WEBHOOK_URL)$' | \
-            grep -vE '^(GITHUB_TOKEN|GH_TOKEN|ANTHROPIC_API_KEY|CLAUDE_CODE_OAUTH_TOKEN|BANKR_LLM_KEY|OPENROUTER_API_KEY|USEPOD_TOKEN|VENICE_API_KEY|SURPLUS_API_KEY|HIVEMINDOS_CREDIT_TOKEN|TELEGRAM_|DISCORD_|SLACK_)' | \
+            grep -vE '^(GITHUB_TOKEN|GH_TOKEN|ANTHROPIC_API_KEY|CLAUDE_CODE_OAUTH_TOKEN|BANKR_LLM_KEY|OPENROUTER_API_KEY|USEPOD_TOKEN|VENICE_API_KEY|SURPLUS_API_KEY|HIVEMINDOS_CREDIT_TOKEN|ORCAROUTER_API_KEY|TELEGRAM_|DISCORD_|SLACK_)' | \
             sort -u) || true
 
           [ -z "$SECRETS" ] && exit 0
@@ -709,6 +709,7 @@ jobs:
           VENICE_API_KEY: ${{ secrets.VENICE_API_KEY }}
           HIVEMINDOS_CREDIT_TOKEN: ${{ secrets.HIVEMINDOS_CREDIT_TOKEN }}
           SURPLUS_API_KEY: ${{ secrets.SURPLUS_API_KEY }}
+          ORCAROUTER_API_KEY: ${{ secrets.ORCAROUTER_API_KEY }}
           # Optional gateway model overrides + sidecar debug (defaults live in scripts/llm-gateway.sh)
           OPENROUTER_MODEL: ${{ vars.OPENROUTER_MODEL }}
           OPENROUTER_MODEL_SONNET: ${{ vars.OPENROUTER_MODEL_SONNET }}
@@ -729,6 +730,7 @@ jobs:
           GLM_MODEL_OPUS: ${{ vars.GLM_MODEL_OPUS }}
           GLM_MODEL_HAIKU: ${{ vars.GLM_MODEL_HAIKU }}
           GLM_REASONING_EFFORT: ${{ vars.GLM_REASONING_EFFORT }}
+          ORCAROUTER_MODEL: ${{ vars.ORCAROUTER_MODEL }}
           CCR_LOG: ${{ vars.CCR_LOG }}
           # Optional Langfuse observability — set both keys to stream Claude Code's
           # run to Langfuse as a trace (scripts/langfuse-otel.sh; no-op when unset).
@@ -1491,6 +1493,7 @@ jobs:
           VENICE_API_KEY: ${{ secrets.VENICE_API_KEY }}
           HIVEMINDOS_CREDIT_TOKEN: ${{ secrets.HIVEMINDOS_CREDIT_TOKEN }}
           SURPLUS_API_KEY: ${{ secrets.SURPLUS_API_KEY }}
+          ORCAROUTER_API_KEY: ${{ secrets.ORCAROUTER_API_KEY }}
           XAI_API_KEY: ${{ secrets.XAI_API_KEY }}   # grok scorer: API-key auth path
           GROK_CREDENTIALS: ${{ secrets.GROK_CREDENTIALS }}   # grok scorer: X-account OAuth (restored by run-grok.sh)
           HERMES_AUTH: ${{ secrets.HERMES_AUTH }}
@@ -1517,6 +1520,7 @@ jobs:
           GLM_MODEL_OPUS: ${{ vars.GLM_MODEL_OPUS }}
           GLM_MODEL_HAIKU: ${{ vars.GLM_MODEL_HAIKU }}
           GLM_REASONING_EFFORT: ${{ vars.GLM_REASONING_EFFORT }}
+          ORCAROUTER_MODEL: ${{ vars.ORCAROUTER_MODEL }}
           CCR_LOG: ${{ vars.CCR_LOG }}
           LANGFUSE_PUBLIC_KEY: ${{ secrets.LANGFUSE_PUBLIC_KEY }}
           LANGFUSE_SECRET_KEY: ${{ secrets.LANGFUSE_SECRET_KEY }}
@@ -1769,6 +1773,7 @@ jobs:
           VENICE_API_KEY: ${{ secrets.VENICE_API_KEY }}
           HIVEMINDOS_CREDIT_TOKEN: ${{ secrets.HIVEMINDOS_CREDIT_TOKEN }}
           SURPLUS_API_KEY: ${{ secrets.SURPLUS_API_KEY }}
+          ORCAROUTER_API_KEY: ${{ secrets.ORCAROUTER_API_KEY }}
           OPENROUTER_MODEL: ${{ vars.OPENROUTER_MODEL }}
           OPENROUTER_MODEL_SONNET: ${{ vars.OPENROUTER_MODEL_SONNET }}
           OPENROUTER_MODEL_HAIKU: ${{ vars.OPENROUTER_MODEL_HAIKU }}
@@ -1787,6 +1792,7 @@ jobs:
           GLM_MODEL_SONNET: ${{ vars.GLM_MODEL_SONNET }}
           GLM_MODEL_OPUS: ${{ vars.GLM_MODEL_OPUS }}
           GLM_MODEL_HAIKU: ${{ vars.GLM_MODEL_HAIKU }}
+          ORCAROUTER_MODEL: ${{ vars.ORCAROUTER_MODEL }}
           GLM_REASONING_EFFORT: ${{ vars.GLM_REASONING_EFFORT }}
           GLM_API_KEY: ${{ secrets.GLM_API_KEY }}
           ZAI_API_KEY: ${{ secrets.ZAI_API_KEY }}
